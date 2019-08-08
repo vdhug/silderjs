@@ -10,6 +10,12 @@ export default class Slide {
   }
 
 
+  // Método para adicionar transição entre os slides
+  transition(active) {
+    this.slide.style.transition = active ? 'transform .3s' : '';
+  }
+
+
   // Movendo o slider de acordo com a quantidade de pixels do arrastar e soltar
   moveSlide(distX) {
     // Salvando a distancia que o slide se moveu
@@ -33,6 +39,7 @@ export default class Slide {
   // Função que define quando o clique no slide começa, então 
   // adiciona o evento de mouse move
   onStart(event) {
+    this.transition(false);
     let moveType;
     if (event.type === 'mousedown') {
         event.preventDefault();
@@ -61,8 +68,24 @@ export default class Slide {
     // Guardar o valor que o slide se moveu
     this.dist.finalPosition = this.dist.movePosition;
     this.wrapper.removeEventListener(moveType, this.onMove);
+    this.transition(true);
+    this.changeSlideOnEnd();
   }
 
+
+  // Ao clicar e arrastar, centralizar elemento do slide que tem o foco
+  changeSlideOnEnd() {
+    // Checa se o movimento foi para o próximo e se existe um proximo slide
+    if (this.dist.movement > 120 && this.index.next !== false) {
+      this.activeNextSlide();
+    } else if (this.dist.movement < -120 && this.index.prev !== false){
+      this.activePrevSlide();
+    } else {
+      this.changeSlide(this.index.active);
+    }
+  }
+
+  
   addSlideEvents() {
     this.wrapper.addEventListener('mousedown', this.onStart);
     this.wrapper.addEventListener('touchstart', this.onStart);
@@ -124,12 +147,22 @@ export default class Slide {
   } 
 
 
-  
+  activePrevSlide() {
+    if (this.index.prev !== false)
+      this.changeSlide(this.index.prev);
+  }
+
+  activeNextSlide() {
+    if (this.index.next !== false)
+      this.changeSlide(this.index.next);
+  }
 
   init() {
     this.bindEvents();
+    this.transition(true);
     this.addSlideEvents();
     this.slideConfig();
+    this.slidesIndexNav(0);
   }
 
 }
