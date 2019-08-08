@@ -1,3 +1,5 @@
+import debounce from './debounce.js';
+
 export default class Slide {
   constructor(slide, wrapper) {
       this.slide = document.querySelector(slide);
@@ -7,6 +9,7 @@ export default class Slide {
           startX: 0,
           movement: 0
       };
+      this.activeClass = 'active';
   }
 
 
@@ -93,12 +96,19 @@ export default class Slide {
     this.wrapper.addEventListener('touchend', this.onEnd);
   }
 
-  bindEvents() {
-    this.onStart = this.onStart.bind(this);
-    this.onMove = this.onMove.bind(this);
-    this.onEnd = this.onEnd.bind(this);
+  // Evento de resize na janela que o slide está
+  onResize() {
+    setTimeout(() => {
+      this.slideConfig();
+      this.changeSlide(this.index.active);
+    }, 1000);
+    
   }
 
+
+  addResizeEvent() {
+    window.addEventListener('resize', this.onResize);
+  }
 
   // Slides config
   // Metodo para calcular a posicao de um slide no centro da tela
@@ -144,7 +154,14 @@ export default class Slide {
 
     // Atualizar a distancia do elemento do slide
     this.dist.finalPosition = activeSlide.position;
+    this.changeActiveClass();
   } 
+
+
+  changeActiveClass() {
+    this.slideArray.forEach(item => item.element.classList.remove(this.activeClass));
+    this.slideArray[this.index.active].element.classList.add(this.activeClass);
+  }
 
 
   activePrevSlide() {
@@ -157,12 +174,23 @@ export default class Slide {
       this.changeSlide(this.index.next);
   }
 
+
+  bindEvents() {
+    this.onStart = this.onStart.bind(this);
+    this.onMove = this.onMove.bind(this);
+    this.onEnd = this.onEnd.bind(this);
+
+    this.onResize = debounce(this.onResize.bind(this), 200);
+  }
+
   init() {
     this.bindEvents();
     this.transition(true);
     this.addSlideEvents();
     this.slideConfig();
-    this.slidesIndexNav(0);
+    this.addResizeEvent();
+    this.changeSlide(0);
+
   }
 
 }
