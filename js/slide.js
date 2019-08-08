@@ -76,9 +76,60 @@ export default class Slide {
     this.onEnd = this.onEnd.bind(this);
   }
 
+
+  // Slides config
+  // Metodo para calcular a posicao de um slide no centro da tela
+  slidePosition(slide) {
+    // Calcula o valor de margem que o objeto possui
+    const margin = (this.wrapper.offsetWidth - slide.offsetWidth) / 2;
+
+    // Retorna o valor exato que o objet precisa para ficar centralizado na tela.
+    return -(slide.offsetLeft - margin);
+  }
+
+
+  slideConfig() {
+    // Criando o array de slides com cada li dentro dele atraves da desestruturação
+    this.slideArray = [...this.slide.children].map((element) => {
+      const position = this.slidePosition(element);
+      return {
+        position,
+        element
+      }
+    });
+  }
+
+
+  // Criando metodo para navegacao pelos indices
+  slidesIndexNav(index) {
+    
+    const last = this.slideArray.length - 1;
+
+    this.index = {
+      prev: index === 0 ? false : index-1,
+      active: index,
+      next: index === last ? false : index+1,
+    };
+  }
+
+
+  // Método que controla o slide de acordo com o indice passado
+  changeSlide(index) {
+    const activeSlide = this.slideArray[index];
+    this.moveSlide(this.slideArray[index].position);
+    this.slidesIndexNav(index);
+
+    // Atualizar a distancia do elemento do slide
+    this.dist.finalPosition = activeSlide.position;
+  } 
+
+
+  
+
   init() {
     this.bindEvents();
     this.addSlideEvents();
+    this.slideConfig();
   }
 
 }
